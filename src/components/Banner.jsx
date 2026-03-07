@@ -1,53 +1,106 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import BudgetFilter from "./BudgetFilter";
+import TypeFilter from "./TypeFilter";
+import StatusFilter from "./StatusFilter";
+import "./Banner.css";
 
-import { Link } from "react-router-dom";
+const bannerImages = [
+    "/img/banner.jpg",
+    "/img/banner2.jpg",
+    "/img/banner3.jpg",
+    "/img/banner4.jpg"
+];
+
 const Banner = () => {
-    const [search, setSearch] = useState();
-    const [find, setFind] = useState([]);
+    const navigate = useNavigate();
     const [word, setWord] = useState("");
+    const [selectedBudget, setSelectedBudget] = useState("all");
+    const [selectedType, setSelectedType] = useState("all");
+    const [selectedStatus, setSelectedStatus] = useState("all");
+    const [activeImageIndex, setActiveImageIndex] = useState(0);
+
     useEffect(() => {
-        setSearch(["a", "b", "test", "mb"])
-    }, [])
-    const findSearch = (e) => {
-        setWord(e.target.value)
-        const filteredCountries = search.filter(item => item.indexOf(e.target.value) > -1 ? item : null);
-        e.target.value.length === 0 ? setFind([]) : setFind(filteredCountries);
-    }
-    const findResult = () => {
-        if (find.length === 0 && word.length > 0) {
-            return <div className="find-search">Not Found</div>
-        }
-        if (find.length > 0) {
-            return <div className="find-search">
-                {
-                    find.map(item => {
-                        return <Link key={item} to="#">{item}</Link>
-                    })
-                }
-            </div>
-        }
-    }
+        const timer = setInterval(() => {
+            setActiveImageIndex((previous) => (previous + 1) % bannerImages.length);
+        }, 5000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    const activeImage = useMemo(() => activeImageIndex, [activeImageIndex]);
+
+    const onSubmitSearch = (event) => {
+        event.preventDefault();
+
+        const params = new URLSearchParams({
+            word: word.trim(),
+            budget: selectedBudget,
+            type: selectedType,
+            status: selectedStatus
+        });
+
+        navigate(`/search?${params.toString()}`);
+    };
+
     return (
-        <div className="banner d-flex align-items-center" style={{ backgroundImage: `url(/img/banner.jpg)` }}>
-            <div className="bg-custom">
+        <div className="banner d-flex align-items-center">
+            <div className="banner-images" aria-hidden="true">
+                {bannerImages.map((image, index) => (
+                    <div
+                        key={`${image}-${index}`}
+                        className={`banner-image-layer ${activeImage === index ? "is-active" : ""}`}
+                        style={{ backgroundImage: `url(${image})` }}
+                    />
+                ))}
+            </div>
+            <div className="bg-custom banner-overlay">
                 <div className="container">
-                    <div className="row">
-                        <div className="col-lg-6 mx-auto">
-                            <div className="banner-area text-center pt-4 pb-4">
-                                <h2 className="mt-2 mb-4 banner-title"><strong> BULLZY REALITY</strong> </h2>
-                                <p> CONFIDENCE IN EVERY SQUARE FOOT</p>
-                                <div className="search-area">
-                                    <input value={word} onChange={(e) => findSearch(e)} type="text" className="inp-search" placeholder="Search" />
-                                    <button className="btn-search m-2">Search All</button>
+                    <div className="row justify-content-start banner-row">
+                        <div className="col-12 col-md-10 col-lg-8">
+                            <div className="banner-area banner-content text-start pt-4 pb-4">
+                                <div className="banner-premium-card">
+                                    <h2 className="mt-2 mb-3 banner-title"><strong>BULLZY REALTY</strong></h2>
+                                    <p className="banner-subtitle">Confidence in every square foot</p>
+
+                                    <div className="banner-controls">
+                                        <form className="search-panel" onSubmit={onSubmitSearch}>
+                                            <div className="search-main-row">
+                                                <input
+                                                    value={word}
+                                                    onChange={(event) => setWord(event.target.value)}
+                                                    type="text"
+                                                    className="inp-search"
+                                                    aria-label="Search properties"
+                                                    placeholder="Search by project, location, developer"
+                                                />
+                                                <button type="submit" className="btn-search">Search</button>
+                                            </div>
+
+                                            <div className="search-filter-row">
+                                                <BudgetFilter
+                                                    value={selectedBudget}
+                                                    onChange={(event) => setSelectedBudget(event.target.value)}
+                                                />
+                                                <TypeFilter
+                                                    value={selectedType}
+                                                    onChange={(event) => setSelectedType(event.target.value)}
+                                                />
+                                                <StatusFilter
+                                                    value={selectedStatus}
+                                                    onChange={(event) => setSelectedStatus(event.target.value)}
+                                                />
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
-                                {findResult()}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default Banner;

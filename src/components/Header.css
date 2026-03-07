@@ -1,0 +1,211 @@
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(248, 250, 253, 0.96);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(31, 42, 68, 0.08);
+    box-shadow: 0 8px 24px rgba(10, 22, 40, 0.08);
+}
+
+.header .container {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.header .navbar {
+    padding: 0;
+}
+
+.header .navbar > .container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-brand {
+    margin-right: 0;
+}
+
+.brand-wrap {
+    gap: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.logo-shell {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #f8fafd 0%, #eef2f9 100%);
+    border: 1px solid rgba(31, 42, 68, 0.15);
+    box-shadow: 0 10px 22px rgba(12, 28, 50, 0.2);
+}
+
+.header .logo-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 0;
+    filter: contrast(1.12) saturate(1.06);
+}
+
+.brand-text-shell {
+    display: inline-flex;
+    align-items: center;
+    overflow: hidden;
+    max-width: 240px;
+    opacity: 1;
+    transition: max-width 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+
+.header .brand-text {
+    display: inline-block;
+    margin-left: 10px;
+    white-space: nowrap;
+    font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #1f2a44;
+    transform: translateX(0) scale(1);
+    opacity: 1;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+
+.brand-wrap.brand-collapsed .brand-text-shell {
+    max-width: 0;
+    opacity: 0;
+}
+
+.brand-wrap.brand-collapsed .brand-text {
+    transform: translateX(-44px) scale(0.9);
+    opacity: 0;
+}
+
+.header-toggler {
+    border: 1px solid rgba(31, 42, 68, 0.22);
+    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    padding: 9px 8px;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    background: #f8fafd;
+    box-shadow: 0 6px 15px rgba(24, 36, 56, 0.1);
+}
+
+.header-toggler:focus {
+    box-shadow: 0 0 0 0.25rem rgba(43, 74, 129, 0.22);
+}
+
+.header-toggler .toggler-line {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background: #1f2a44;
+}
+
+.header-collapse {
+    flex-grow: 0;
+}
+
+.header-nav-links {
+    align-items: center;
+    gap: 4px;
+}
+
+.header .nav-item {
+    padding: 4px;
+}
+
+.header-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 14px !important;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #24314d !important;
+    line-height: 1;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.header-nav-link:hover,
+.header-nav-link:focus {
+    color: #1a2540 !important;
+    background: #edf2ff;
+}
+
+@media (max-width: 991.98px) {
+    .header .container {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .header-collapse {
+        width: 100%;
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 14px;
+        border: 1px solid #e0e6ef;
+        background: rgba(248, 250, 253, 0.98);
+        box-shadow: 0 14px 28px rgba(8, 19, 36, 0.12);
+    }
+
+    .header-nav-links {
+        width: 100%;
+        align-items: stretch;
+        gap: 2px;
+    }
+
+    .header .nav-item {
+        width: 100%;
+        padding: 2px 0;
+    }
+
+    .header-nav-link {
+        width: 100%;
+        justify-content: space-between;
+        padding: 12px !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .header .container {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .logo-shell {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+    }
+
+    .brand-text-shell {
+        max-width: 180px;
+    }
+
+    .header .brand-text {
+        font-size: 0.9rem;
+        letter-spacing: 0.05em;
+    }
+
+    .header-toggler {
+        width: 40px;
+        height: 40px;
+        padding: 8px 7px;
+    }
+}

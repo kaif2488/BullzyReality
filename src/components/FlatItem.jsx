@@ -1,34 +1,36 @@
 import { Link } from "react-router-dom";
-import sample11 from "../assets/sample11.png";
 
+const FlatItem = ({ property }) => {
+    if (!property) return null;
 
-const FlatItem = ({slug}) => {
     return (
-        <div className="text-center col-lg-4 col-12 col-md-6 ">
+        <div className="text-center col-lg-4 col-12 col-md-6">
             <div className="item">
                 <div className="item-image">
-                    <img className="img-fluid" src={sample11} alt="flat" />
+                    <img className="img-fluid" src={property.image} alt={property.name} />
                 </div>
                 <div className="item-description">
                     <div className="d-flex justify-content-between mb-3">
-                        <span className="item-title">Arthaya Homes</span>
-                        <span className="item-price">₹1.15cr</span>
+                        <span className="item-title">{property.name}</span>
+                        <span className="item-price">
+                            {"\u20B9"}{property.price.toLocaleString("en-IN")}
+                        </span>
                     </div>
                     <div className="item-icon d-flex alig-items-center justify-content-between">
                         <div>
-                            <i className="fas fa-check-circle"></i> <span>Big Carpet Area</span>
+                            <i className="fas fa-check-circle"></i> <span>{property.type}</span>
                         </div>
                         <div>
-                            <i className="fas fa-check-circle"></i> <span> Best View</span>
+                            <i className="fas fa-check-circle"></i> <span>{property.status}</span>
                         </div>
-                        <Link to={`/flat/${slug}`} className="item-title">
+                        <Link to={`/flat/${property.slug}`} className="item-title">
                             <button className="btn btn-detail">View</button>
                         </Link>
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default FlatItem
+export default FlatItem;
