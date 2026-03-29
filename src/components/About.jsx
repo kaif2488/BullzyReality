@@ -130,7 +130,7 @@ const About = () => {
                                 <h4 className="apple-contact-number">{whatsappDisplayNumber}</h4>
                                 <div className="apple-contact-meta">
                                     <p><i className="fas fa-map-marker-alt"></i> Mumbai, India</p>
-                                    <p><i className="fas fa-envelope"></i> bullzyreality@house.com</p>
+                                    <p><i className="fas fa-envelope"></i> bullzyreality@gmail.com</p>
                                     <p><i className="fas fa-clock"></i> 08:00 - 18:00</p>
                                 </div>
 

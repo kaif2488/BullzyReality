@@ -11,21 +11,21 @@ const LocationProjects = () => {
 
     const locationProjects = useMemo(() => {
         if (!location) {
-            return [...propertySearchData].sort((a, b) => a.location.localeCompare(b.location));
+            return [...propertySearchData].sort((a, b) => a.locality.localeCompare(b.locality));
         }
 
         const normalizedLocation = location.toLowerCase();
-        return propertySearchData.filter((item) => item.location.toLowerCase() === normalizedLocation);
+        return propertySearchData.filter((item) => item.locality.toLowerCase() === normalizedLocation);
     }, [location]);
 
     const groupedByLocation = useMemo(() => {
         if (location) return [];
 
         const grouped = locationProjects.reduce((acc, item) => {
-            if (!acc[item.location]) {
-                acc[item.location] = [];
+            if (!acc[item.locality]) {
+                acc[item.locality] = [];
             }
-            acc[item.location].push(item);
+            acc[item.locality].push(item);
             return acc;
         }, {});
 
@@ -33,7 +33,7 @@ const LocationProjects = () => {
     }, [location, locationProjects]);
 
     const uniqueLocationCount = useMemo(
-        () => new Set(locationProjects.map((item) => item.location)).size,
+        () => new Set(locationProjects.map((item) => item.locality)).size,
         [locationProjects]
     );
 

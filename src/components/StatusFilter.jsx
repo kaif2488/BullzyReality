@@ -1,7 +1,8 @@
+import { propertyStatusOptions } from "../data/propertySearchData";
+
 export const statusFilters = [
     { label: "All Status", value: "all" },
-    { label: "Ready to Move", value: "Ready to Move" },
-    { label: "Under Construction", value: "Under Construction" }
+    ...propertyStatusOptions.map((status) => ({ label: status, value: status }))
 ];
 
 const StatusFilter = ({ value, onChange }) => {

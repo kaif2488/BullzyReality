@@ -5,7 +5,7 @@ const Contact = () => {
     const [phone, setPhone] = useState("");
     const [subject, setSubject] = useState("");
     const [message, setMessage] = useState("");
-    const whatsappNumber = "9170394 43733";
+    const whatsappNumber = "917039443733";
 
     const handleSendMessage = () => {
         const trimmedName = name.trim();
@@ -51,7 +51,7 @@ const Contact = () => {
                                     <div className="contact-item">
                                         <i className="fas fa-envelope"></i>
                                         <h5>Mail</h5>
-                                        <h6>bullzyreality@house.com</h6>
+                                        <h6>bullzyreality@gmail.com</h6>
                                     </div>
                                 </div>
                                 <div className="col-12 col-md-6 col-lg-4 d-flex">

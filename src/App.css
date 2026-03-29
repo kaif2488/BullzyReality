@@ -3,6 +3,7 @@
 
 * {
   font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
 }
 
 :root {
@@ -51,6 +52,16 @@ body,
 #root,
 .App {
   background: var(--soothing-page-bg);
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+img,
+video {
+  max-width: 100%;
 }
 
 .title-area {
@@ -481,6 +492,7 @@ body,
 .best-estate-features {
   display: flex;
   justify-content: space-between;
+  gap: 14px;
   padding: 15px;
 }
 
@@ -532,6 +544,14 @@ body,
   border: 1px solid gainsboro;
   outline: none;
   border-radius: 5px;
+}
+
+.subscribe-form-shell {
+  width: 100%;
+}
+
+.subscribe-submit-btn {
+  min-height: 46px;
 }
 
 .section-subscribe {
@@ -1938,6 +1958,7 @@ body,
   display: flex;
   padding: 35px;
   justify-content: space-between;
+  gap: 20px;
 }
 
 .fd-price {
@@ -2038,6 +2059,23 @@ body,
 }
 
 @media (max-width: 991px) {
+  .title-area {
+    margin-bottom: 28px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .page-top {
+    padding: 40px 24px;
+  }
+
+  .page-content {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
   .intro-splash-inner {
     width: clamp(220px, 62vw, 500px);
   }
@@ -2073,6 +2111,15 @@ body,
     flex-direction: column;
     gap: 10px;
     align-items: flex-start;
+  }
+
+  .fd-item,
+  .fd-sidebar-item {
+    padding: 24px;
+  }
+
+  .team .team-img img {
+    height: 360px;
   }
 
   .location-slider-item {
@@ -2116,6 +2163,31 @@ body,
 }
 
 @media (max-width: 500px) {
+  .title {
+    font-size: 28px;
+  }
+
+  .title-description {
+    font-size: 14px;
+  }
+
+  .page-top {
+    padding: 32px 16px;
+  }
+
+  .page-content {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .page-top .page-title {
+    font-size: 28px;
+  }
+
+  .page-top .page-description {
+    font-size: 17px;
+  }
+
   .intro-splash-inner {
     width: min(84vw, 360px);
   }
@@ -2132,6 +2204,14 @@ body,
   .contact .contact-item {
     min-height: 150px;
     padding: 22px;
+  }
+
+  .contact .contact-info-row {
+    margin-top: 0;
+  }
+
+  .contact .contact-form-row {
+    margin-top: 0.75rem;
   }
 
   .apple-about-title {
@@ -2266,6 +2346,64 @@ body,
     gap: 12px;
   }
 
+  .item {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .item-description {
+    padding: 14px;
+  }
+
+  .item-description div:nth-child(1) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .section-all-re .item-price {
+    min-width: 0;
+    font-size: 22px;
+  }
+
+  .best-estate-features {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .best-estate-feature {
+    margin-right: 0;
+  }
+
+  .best-estate-features .best-estate-price {
+    font-size: 20px;
+  }
+
+  .team .team-img img {
+    height: 280px;
+  }
+
+  .team .team-info {
+    padding: 22px 12px;
+  }
+
+  .fd-top {
+    padding: 22px 18px;
+  }
+
+  .fd-price {
+    font-size: 30px;
+  }
+
+  .fd-item,
+  .fd-sidebar-item {
+    padding: 18px;
+  }
+
+  .subscribe-submit-btn {
+    min-height: 42px;
+  }
+
   .insight-rank-badge {
     font-size: 72px;
     top: -14px;
@@ -2287,6 +2425,10 @@ body,
 }
 
 @media (min-width: 501px) and (max-width: 991px) {
+  .team .team-img img {
+    height: 320px;
+  }
+
   .apple-social-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

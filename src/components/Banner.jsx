@@ -1,16 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BudgetFilter from "./BudgetFilter";
 import TypeFilter from "./TypeFilter";
 import StatusFilter from "./StatusFilter";
+import backgroundVideo from "../assets/Background_video.mp4";
 import "./Banner.css";
-
-const bannerImages = [
-    "/img/banner.jpg",
-    "/img/banner2.jpg",
-    "/img/banner3.jpg",
-    "/img/banner4.jpg"
-];
 
 const Banner = () => {
     const navigate = useNavigate();
@@ -18,17 +12,6 @@ const Banner = () => {
     const [selectedBudget, setSelectedBudget] = useState("all");
     const [selectedType, setSelectedType] = useState("all");
     const [selectedStatus, setSelectedStatus] = useState("all");
-    const [activeImageIndex, setActiveImageIndex] = useState(0);
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setActiveImageIndex((previous) => (previous + 1) % bannerImages.length);
-        }, 5000);
-
-        return () => clearInterval(timer);
-    }, []);
-
-    const activeImage = useMemo(() => activeImageIndex, [activeImageIndex]);
 
     const onSubmitSearch = (event) => {
         event.preventDefault();
@@ -45,14 +28,16 @@ const Banner = () => {
 
     return (
         <div className="banner d-flex align-items-center">
-            <div className="banner-images" aria-hidden="true">
-                {bannerImages.map((image, index) => (
-                    <div
-                        key={`${image}-${index}`}
-                        className={`banner-image-layer ${activeImage === index ? "is-active" : ""}`}
-                        style={{ backgroundImage: `url(${image})` }}
-                    />
-                ))}
+            <div className="banner-media" aria-hidden="true">
+                <video
+                    className="banner-video"
+                    src={backgroundVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                />
             </div>
             <div className="bg-custom banner-overlay">
                 <div className="container">

@@ -1,7 +1,27 @@
 import React, { useState } from "react";
 import ImageGallery from "react-image-gallery";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import propertySearchData from "../data/propertySearchData";
+import propertySearchData, { propertyImageFallback } from "../data/propertySearchData";
+
+const getPricingLabel = (category) => {
+    switch (category) {
+        case "range":
+            return "Range";
+        case "onwards":
+            return "Starting Price";
+        case "psf":
+            return "PSF Pricing";
+        case "total":
+            return "Total Price";
+        default:
+            return "Mixed Pricing";
+    }
+};
+
+const handlePropertyImageError = (event) => {
+    event.currentTarget.onerror = null;
+    event.currentTarget.src = propertyImageFallback;
+};
 
 const FlatDetail = () => {
     const { slug } = useParams();
@@ -30,17 +50,20 @@ const FlatDetail = () => {
         );
     }
 
-    const images = [
-        { original: property.image, thumbnail: property.image },
-        { original: "/img/sample12.png", thumbnail: "/img/sample12.png" },
-        { original: "/img/sample13.png", thumbnail: "/img/sample13.png" }
-    ];
+    const images = (property.images?.length ? property.images : [propertyImageFallback]).map((image) => ({
+        original: image || propertyImageFallback,
+        thumbnail: image || propertyImageFallback
+    }));
 
     const recentlyAdded = propertySearchData.filter((item) => item.slug !== property.slug).slice(0, 3);
 
-    const formattedPrice = `${"\u20B9"}${property.price.toLocaleString("en-IN")}`;
+    const formattedPrice = property.priceLabel || "Price on request";
     const location = property.location || "Location not listed";
+    const locality = property.locality || location;
     const developerName = property.developerName || "Developer not listed";
+    const featureHighlights = property.featureHighlights?.length
+        ? property.featureHighlights
+        : [property.type, property.status, locality, developerName].filter(Boolean);
 
     const whatsappMessage = encodeURIComponent(`Hello, I am interested in ${property.name} in ${location}`);
 
@@ -89,6 +112,21 @@ const FlatDetail = () => {
                             onClick={setUserSlideInterval}
                             onTouchStart={setUserSlideInterval}
                             onThumbnailClick={setUserSlideInterval}
+                            renderItem={(item) => (
+                                <img
+                                    src={item.original || propertyImageFallback}
+                                    alt={property.name}
+                                    className="image-gallery-image"
+                                    onError={handlePropertyImageError}
+                                />
+                            )}
+                            renderThumbInner={(item) => (
+                                <img
+                                    src={item.thumbnail || propertyImageFallback}
+                                    alt={`${property.name} thumbnail`}
+                                    onError={handlePropertyImageError}
+                                />
+                            )}
                         />
 
                         <div className="row">
@@ -97,8 +135,9 @@ const FlatDetail = () => {
                                     <h4>Overview and Property Details</h4>
                                     <p>
                                         {property.name} is a {property.type.toLowerCase()} currently marked as {property.status.toLowerCase()} by {developerName}.
-                                        This listing is presented directly from the latest property data and includes current pricing details.
+                                        This listing is presented directly from the latest submitted property data and includes the most relevant project details available right now.
                                     </p>
+                                    {property.featuresText ? <p>{property.featuresText}</p> : null}
 
                                     <div className="row" style={{ marginTop: "15px" }}>
                                         <div className="col-lg-4"><strong>Type:</strong> {property.type}</div>
@@ -107,21 +146,22 @@ const FlatDetail = () => {
                                     </div>
                                     <div className="row" style={{ marginTop: "8px" }}>
                                         <div className="col-lg-4"><strong>Developer:</strong> {developerName}</div>
-                                        <div className="col-lg-8"><strong>Location:</strong> {location}</div>
+                                        <div className="col-lg-4"><strong>Locality:</strong> {locality}</div>
+                                        <div className="col-lg-4"><strong>Pricing:</strong> {getPricingLabel(property.priceCategory)}</div>
+                                    </div>
+                                    <div className="row" style={{ marginTop: "8px" }}>
+                                        <div className="col-lg-12"><strong>Location:</strong> {location}</div>
                                     </div>
                                 </div>
 
                                 <div className="fd-item fd-features">
                                     <h4>Features</h4>
                                     <div className="row">
-                                        <div className="col-lg-4"><i className="fa fa-check"></i><span>24x7 Security</span></div>
-                                        <div className="col-lg-4"><i className="fa fa-check"></i><span>Power Backup</span></div>
-                                        <div className="col-lg-4"><i className="fa fa-check"></i><span>Lift Facility</span></div>
-                                    </div>
-                                    <div className="row">
-                                        <div className="col-lg-4"><i className="fa fa-check"></i><span>Reserved Parking</span></div>
-                                        <div className="col-lg-4"><i className="fa fa-check"></i><span>Children's Play Area</span></div>
-                                        <div className="col-lg-4"><i className="fa fa-check"></i><span>Open Space</span></div>
+                                        {featureHighlights.map((feature) => (
+                                            <div key={feature} className="col-lg-6">
+                                                <i className="fa fa-check"></i><span>{feature}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
@@ -194,9 +234,10 @@ const FlatDetail = () => {
                                         <li>{property.type}</li>
                                         <li>{property.status}</li>
                                         <li>{developerName}</li>
+                                        <li>{locality}</li>
                                         <li>{location}</li>
                                         <li>{formattedPrice}</li>
-                                        <li>{property.name}</li>
+                                        <li>{getPricingLabel(property.priceCategory)}</li>
                                     </ul>
                                 </div>
 
@@ -204,7 +245,7 @@ const FlatDetail = () => {
                                     <h4>Recently Added</h4>
                                     {recentlyAdded.map((item) => (
                                         <div className="recently-item" key={item.id}>
-                                            <img src={item.image} alt={item.name} width="50" />
+                                            <img src={item.image} alt={item.name} width="50" onError={handlePropertyImageError} />
                                             <Link to={`/flat/${item.slug}`}><span>{item.name}</span></Link>
                                         </div>
                                     ))}

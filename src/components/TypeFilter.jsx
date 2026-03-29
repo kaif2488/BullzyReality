@@ -1,10 +1,8 @@
+import { propertyTypeOptions } from "../data/propertySearchData";
+
 export const typeFilters = [
     { label: "All Types", value: "all" },
-    { label: "Apartment", value: "Apartment" },
-    { label: "Flat", value: "Flat" },
-    { label: "House", value: "House" },
-    { label: "Villa", value: "Villa" },
-    { label: "Penthouse", value: "Penthouse" }
+    ...propertyTypeOptions.map((type) => ({ label: type, value: type }))
 ];
 
 const TypeFilter = ({ value, onChange }) => {

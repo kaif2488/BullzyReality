@@ -1,6 +1,26 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import Title from "./Title";
+import { propertyImageFallback } from "../data/propertySearchData";
+
+const formatCurrencyShort = (amount) => {
+    if (!Number.isFinite(amount) || amount <= 0) return "Mixed pricing";
+
+    if (amount >= 10000000) {
+        return `\u20B9${(amount / 10000000).toFixed(amount >= 100000000 ? 1 : 2).replace(/\\.0$/, "")} Cr`;
+    }
+
+    if (amount >= 100000) {
+        return `\u20B9${(amount / 100000).toFixed(amount >= 1000000 ? 1 : 2).replace(/\\.0$/, "")} Lakh`;
+    }
+
+    return `\u20B9${Math.round(amount).toLocaleString("en-IN")}`;
+};
+
+const handlePropertyImageError = (event) => {
+    event.currentTarget.onerror = null;
+    event.currentTarget.src = propertyImageFallback;
+};
 
 const getTopRankedGroups = (properties, keyName) => {
     const grouped = properties.reduce((acc, item) => {
@@ -10,21 +30,31 @@ const getTopRankedGroups = (properties, keyName) => {
             acc[key] = {
                 name: key,
                 propertyCount: 0,
-                totalCost: 0,
-                totalReviewCount: 0,
-                weightedRatingSum: 0,
                 image: item.image,
-                bestRatedInGroup: item.reviewScore || 0
+                readyCount: 0,
+                relatedLabels: {},
+                minComparablePrice: Number.POSITIVE_INFINITY,
+                latestTimestamp: item.timestampValue || 0
             };
         }
 
         acc[key].propertyCount += 1;
-        acc[key].totalCost += item.price;
-        acc[key].totalReviewCount += item.reviewCount || 0;
-        acc[key].weightedRatingSum += (item.reviewScore || 0) * (item.reviewCount || 0);
+        acc[key].latestTimestamp = Math.max(acc[key].latestTimestamp, item.timestampValue || 0);
 
-        if ((item.reviewScore || 0) > acc[key].bestRatedInGroup) {
-            acc[key].bestRatedInGroup = item.reviewScore || 0;
+        if (item.status === "Ready to Move") {
+            acc[key].readyCount += 1;
+        }
+
+        if (item.budgetComparable && Number.isFinite(item.priceValue)) {
+            acc[key].minComparablePrice = Math.min(acc[key].minComparablePrice, item.priceValue);
+        }
+
+        const relatedLabel = keyName === "developerName" ? item.locality : item.developerName;
+        if (relatedLabel) {
+            acc[key].relatedLabels[relatedLabel] = (acc[key].relatedLabels[relatedLabel] || 0) + 1;
+        }
+
+        if (item.imageCount > 1 || item.timestampValue >= acc[key].latestTimestamp) {
             acc[key].image = item.image;
         }
 
@@ -33,35 +63,39 @@ const getTopRankedGroups = (properties, keyName) => {
 
     return Object.values(grouped)
         .map((entry) => {
-            const averageCost = entry.totalCost / entry.propertyCount;
-            const averageRating = entry.totalReviewCount > 0 ? entry.weightedRatingSum / entry.totalReviewCount : 0;
+            const primaryRelatedLabel = Object.entries(entry.relatedLabels)
+                .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || "";
 
             return {
                 ...entry,
-                averageCost,
-                averageRating
+                primaryRelatedLabel,
+                minComparablePrice: Number.isFinite(entry.minComparablePrice) ? entry.minComparablePrice : null
             };
         })
         .sort((a, b) => {
-            if (b.averageRating !== a.averageRating) {
-                return b.averageRating - a.averageRating;
+            if (b.propertyCount !== a.propertyCount) {
+                return b.propertyCount - a.propertyCount;
             }
-            return b.totalReviewCount - a.totalReviewCount;
+            if (b.readyCount !== a.readyCount) {
+                return b.readyCount - a.readyCount;
+            }
+            return b.latestTimestamp - a.latestTimestamp;
         })
         .slice(0, 7);
 };
 
 const getFeaturedProperties = (properties) => {
-    const ranked = [...properties].sort((a, b) => {
-        if ((b.reviewScore || 0) !== (a.reviewScore || 0)) {
-            return (b.reviewScore || 0) - (a.reviewScore || 0);
-        }
-        return (b.reviewCount || 0) - (a.reviewCount || 0);
-    });
-
-    const filtered = ranked.filter((item) => (item.reviewScore || 0) >= 4.2);
-    const source = filtered.length >= 10 ? filtered : ranked;
-    return source.slice(0, 10);
+    return [...properties]
+        .sort((a, b) => {
+            if (b.timestampValue !== a.timestampValue) {
+                return b.timestampValue - a.timestampValue;
+            }
+            if (b.imageCount !== a.imageCount) {
+                return b.imageCount - a.imageCount;
+            }
+            return a.name.localeCompare(b.name);
+        })
+        .slice(0, 7);
 };
 
 const FlatList = ({ properties = [] }) => {
@@ -84,14 +118,14 @@ const FlatList = ({ properties = [] }) => {
 
     const title = {
         text: "Top Developers and Top Localities",
-        description: "Featured properties plus top ranked developers and localities."
+        description: "Real property submissions with grouped developer and locality browsing."
     };
 
     const featuredProperties = getFeaturedProperties(properties);
     const featuredFirstRow = featuredProperties.slice(0, 4);
     const featuredSecondRow = featuredProperties.slice(4, 7);
     const topDevelopers = getTopRankedGroups(properties, "developerName");
-    const topLocalities = getTopRankedGroups(properties, "location");
+    const topLocalities = getTopRankedGroups(properties, "locality");
 
     const onDragStart = (event, rowRef, dragRef) => {
         if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -159,15 +193,13 @@ const FlatList = ({ properties = [] }) => {
                                 <Link key={property.id} className="insight-card-link" to={`/flat/${property.slug}`}>
                                     <article className="insight-card">
                                         <div className="insight-card-image">
-                                            <img src={property.image} alt={property.name} />
+                                            <img src={property.image} alt={property.name} onError={handlePropertyImageError} />
                                         </div>
                                         <h5 className="insight-card-title">{property.name}</h5>
-                                        <p className="insight-metric">
-                                            <i className="fas fa-star"></i> {(property.reviewScore || 0).toFixed(1)} / 5
-                                        </p>
-                                        <p className="insight-meta">{property.reviewCount || 0} reviews</p>
-                                        <p className="insight-meta">{property.location}</p>
-                                        <p className="insight-cost">Price: {"\u20B9"}{property.price.toLocaleString("en-IN")}</p>
+                                        <p className="insight-metric">{property.locality}</p>
+                                        <p className="insight-meta">{property.developerName}</p>
+                                        <p className="insight-meta">{property.type} | {property.status}</p>
+                                        <p className="insight-cost">{property.priceLabel}</p>
                                     </article>
                                 </Link>
                             ))}
@@ -178,15 +210,13 @@ const FlatList = ({ properties = [] }) => {
                                 <Link key={property.id} className="insight-card-link" to={`/flat/${property.slug}`}>
                                     <article className="insight-card">
                                         <div className="insight-card-image">
-                                            <img src={property.image} alt={property.name} />
+                                            <img src={property.image} alt={property.name} onError={handlePropertyImageError} />
                                         </div>
                                         <h5 className="insight-card-title">{property.name}</h5>
-                                        <p className="insight-metric">
-                                            <i className="fas fa-star"></i> {(property.reviewScore || 0).toFixed(1)} / 5
-                                        </p>
-                                        <p className="insight-meta">{property.reviewCount || 0} reviews</p>
-                                        <p className="insight-meta">{property.location}</p>
-                                        <p className="insight-cost">Price: {"\u20B9"}{property.price.toLocaleString("en-IN")}</p>
+                                        <p className="insight-metric">{property.locality}</p>
+                                        <p className="insight-meta">{property.developerName}</p>
+                                        <p className="insight-meta">{property.type} | {property.status}</p>
+                                        <p className="insight-cost">{property.priceLabel}</p>
                                     </article>
                                 </Link>
                             ))}
@@ -223,13 +253,15 @@ const FlatList = ({ properties = [] }) => {
                                 <article className="insight-card insight-card-ranked">
                                     <span className="insight-rank-badge">{index + 1}</span>
                                     <div className="insight-card-image">
-                                        <img src={developer.image} alt={developer.name} />
+                                        <img src={developer.image} alt={developer.name} onError={handlePropertyImageError} />
                                     </div>
                                     <h5 className="insight-card-title">{developer.name}</h5>
-                                    <p className="insight-metric"><i className="fas fa-star"></i> {developer.averageRating.toFixed(1)} / 5</p>
-                                    <p className="insight-meta">{developer.totalReviewCount} reviews</p>
-                                    <p className="insight-meta">{developer.propertyCount} properties</p>
-                                    <p className="insight-cost">Avg Cost: {"\u20B9"}{developer.averageCost.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</p>
+                                    <p className="insight-metric">{developer.propertyCount} properties</p>
+                                    <p className="insight-meta">Ready to move: {developer.readyCount}</p>
+                                    <p className="insight-meta">Top locality: {developer.primaryRelatedLabel || "Multiple locations"}</p>
+                                    <p className="insight-cost">
+                                        {developer.minComparablePrice ? `Starting at ${formatCurrencyShort(developer.minComparablePrice)}` : "Mixed pricing"}
+                                    </p>
                                 </article>
                             </Link>
                         ))}
@@ -269,13 +301,15 @@ const FlatList = ({ properties = [] }) => {
                                 <article className="insight-card insight-card-ranked">
                                     <span className="insight-rank-badge">{index + 1}</span>
                                     <div className="insight-card-image">
-                                        <img src={locality.image} alt={locality.name} />
+                                        <img src={locality.image} alt={locality.name} onError={handlePropertyImageError} />
                                     </div>
                                     <h5 className="insight-card-title">{locality.name}</h5>
-                                    <p className="insight-metric"><i className="fas fa-star"></i> {locality.averageRating.toFixed(1)} / 5</p>
-                                    <p className="insight-meta">{locality.totalReviewCount} reviews</p>
-                                    <p className="insight-meta">{locality.propertyCount} properties</p>
-                                    <p className="insight-cost">Avg Cost: {"\u20B9"}{locality.averageCost.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</p>
+                                    <p className="insight-metric">{locality.propertyCount} properties</p>
+                                    <p className="insight-meta">Ready to move: {locality.readyCount}</p>
+                                    <p className="insight-meta">Top developer: {locality.primaryRelatedLabel || "Multiple developers"}</p>
+                                    <p className="insight-cost">
+                                        {locality.minComparablePrice ? `Starting at ${formatCurrencyShort(locality.minComparablePrice)}` : "Mixed pricing"}
+                                    </p>
                                 </article>
                             </Link>
                         ))}

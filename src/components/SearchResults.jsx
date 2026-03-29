@@ -17,21 +17,20 @@ const SearchResults = () => {
     const filteredProperties = propertySearchData.filter((item) => {
         const matchesWord =
             !word ||
-            item.name.toLowerCase().includes(word) ||
-            item.location.toLowerCase().includes(word) ||
-            item.developerName.toLowerCase().includes(word);
+            item.searchText.includes(word);
 
         const matchesBudget =
             selectedBudget === "all"
                 ? true
-                : item.price >= selectedBudgetOption.min &&
-                  (selectedBudgetOption.max === null || item.price <= selectedBudgetOption.max);
+                : item.budgetComparable &&
+                  item.priceValue >= selectedBudgetOption.min &&
+                  (selectedBudgetOption.max === null || item.priceValue <= selectedBudgetOption.max);
 
         const matchesType = selectedType === "all" ? true : item.type === selectedType;
         const matchesStatus = selectedStatus === "all" ? true : item.status === selectedStatus;
 
         return matchesWord && matchesBudget && matchesType && matchesStatus;
-    });
+    }).sort((a, b) => b.timestampValue - a.timestampValue);
 
     return (
         <section className="section-all-re page-content">
