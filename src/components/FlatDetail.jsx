@@ -1,235 +1,269 @@
-import React from "react";
-import ImageGallery from 'react-image-gallery';
+import React, { useState } from "react";
+import ImageGallery from "react-image-gallery";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import propertySearchData from "../data/propertySearchData";
+import PropertyImage from "./PropertyImage";
 
+const getPricingLabel = (category) => {
+    switch (category) {
+        case "range":
+            return "Range";
+        case "onwards":
+            return "Starting Price";
+        case "psf":
+            return "PSF Pricing";
+        case "total":
+            return "Total Price";
+        default:
+            return "Mixed Pricing";
+    }
+};
 
 const FlatDetail = () => {
-    const images = [
-        {
-            original: '/img/sample11.png',
-            thumbnail: '/img/sample11.png',
-        },
-        {
-            original: '/img/sample12.png',
-            thumbnail: '/img/sample12.png',
-        },
-        {
-            original: '/img/sample13.png',
-            thumbnail: '/img/sample13.png',
-        },
-    ];
+    const { slug } = useParams();
+    const navigate = useNavigate();
+    const [slideIntervalMs, setSlideIntervalMs] = useState(5000);
+
+    const property = propertySearchData.find((item) => item.slug === slug);
+
+    if (!property) {
+        return (
+            <div className="flat-detail">
+                <div className="page-top">
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-lg-12 text-center">
+                                <h1 className="page-title">Property Not Found</h1>
+                                <h2 className="page-description">This property may have been removed.</h2>
+                                <button type="button" className="btn btn-light mt-3" onClick={() => navigate(-1)}>
+                                    Back
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const images = (property.images || [])
+        .filter(Boolean)
+        .map((image) => ({
+            original: image,
+            thumbnail: image
+        }));
+
+    const recentlyAdded = propertySearchData.filter((item) => item.slug !== property.slug).slice(0, 3);
+
+    const formattedPrice = property.priceLabel || "Price on request";
+    const location = property.location || "Location not listed";
+    const locality = property.locality || location;
+    const developerName = property.developerName || "Developer not listed";
+    const featureHighlights = property.featureHighlights?.length
+        ? property.featureHighlights
+        : [property.type, property.status, locality, developerName].filter(Boolean);
+
+    const whatsappMessage = encodeURIComponent(
+        [
+            "Hello, I'm interested in this property.",
+            "",
+            `Property: ${property.name}`,
+            `Location: ${location}`,
+            `Developer: ${developerName}`,
+            `Type: ${property.type}`,
+            `Status: ${property.status}`,
+            `Price: ${formattedPrice}`,
+            "",
+            "Please share more details, brochure, and site visit availability."
+        ].join("\n")
+    );
+
+    const setUserSlideInterval = () => {
+        setSlideIntervalMs((previous) => (previous === 10000 ? previous : 10000));
+    };
 
     return (
         <div className="flat-detail">
             <div className="page-top">
                 <div className="container">
                     <div className="row">
-                        <div className="col-lg-12">
-                            <h1 className="page-title">Arthaya Homes</h1>
+                        <div className="col-lg-12 text-center">
+                            <h1 className="page-title">{property.name}</h1>
                             <h2 className="page-description">Details</h2>
+                            <button type="button" className="btn btn-light mt-3" onClick={() => navigate(-1)}>
+                                Back
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div className="container mt-5 mb-5">
                 <div className="row">
                     <div className="col-lg-12">
                         <div className="fd-top flat-detail-content">
                             <div>
-                                <h3 className="flat-detail-title">Arthaya</h3>
-                                <p className="fd-address"> <i className="fas fa-map-marker-alt"></i>
-                                DahanukarWadi , Kandivali West</p>
+                                <h3 className="flat-detail-title">{property.name}</h3>
+                                <p className="fd-address"><i className="fas fa-map-marker-alt"></i> {location}</p>
                             </div>
                             <div>
-                                <span className="fd-price">₹1.15cr</span>
+                                <span className="fd-price">{formattedPrice}</span>
                             </div>
                         </div>
-                        <ImageGallery flickThreshold={0.50} slideDuration={0} items={images} showNav={false} showFullscreenButton={false} showPlayButton={false} />
+
+                        {images.length ? (
+                            <ImageGallery
+                                flickThreshold={0.5}
+                                slideDuration={500}
+                                slideInterval={slideIntervalMs}
+                                autoPlay={true}
+                                items={images}
+                                showNav={false}
+                                showFullscreenButton={false}
+                                showPlayButton={false}
+                                onClick={setUserSlideInterval}
+                                onTouchStart={setUserSlideInterval}
+                                onThumbnailClick={setUserSlideInterval}
+                                renderItem={(item) => (
+                                    <PropertyImage
+                                        src={item.original}
+                                        alt={property.name}
+                                        className="image-gallery-image"
+                                    />
+                                )}
+                                renderThumbInner={(item) => (
+                                    <PropertyImage
+                                        src={item.thumbnail}
+                                        alt={`${property.name} thumbnail`}
+                                    />
+                                )}
+                            />
+                        ) : (
+                            <div className="property-image-placeholder property-image-placeholder--gallery" role="img" aria-label={`${property.name} image`} />
+                        )}
+
                         <div className="row">
                             <div className="col-lg-8">
                                 <div className="fd-item">
-    <h4>Overview & Property Details</h4>
+                                    <h4>Overview and Property Details</h4>
+                                    <p>
+                                        {property.name} is a {property.type.toLowerCase()} currently marked as {property.status.toLowerCase()} by {developerName}.
+                                        This listing is presented directly from the latest submitted property data and includes the most relevant project details available right now.
+                                    </p>
+                                    {property.featuresText ? <p>{property.featuresText}</p> : null}
 
-    <p>
-        Arthaya Homes is a premium residential project located in 
-        Dahanukarwadi, Kandivali West, offering thoughtfully planned 
-        homes designed for modern urban living. The project focuses on 
-        comfort, functionality, and connectivity, making it ideal for 
-        families and working professionals.
-    </p>
-
-    
-
-    <div className="row" style={{ marginTop: "15px" }}>
-        <div className="col-lg-4">
-            <strong>Bedrooms:</strong> 2
-        </div>
-        <div className="col-lg-4">
-            <strong>Kitchen:</strong> 1
-        </div>
-        <div className="col-lg-4">
-            <strong>Total Rooms:</strong> 5
-        </div>
-    </div>
-
-    <div className="row" style={{ marginTop: "8px" }}>
-        <div className="col-lg-4">
-            <strong>Flooring:</strong> Vitrified Tiles
-        </div>
-        <div className="col-lg-4">
-            <strong>Facing:</strong> East
-        </div>
-        <div className="col-lg-4">
-            <strong>Possession:</strong> Ready to Move
-        </div>
-    </div>
-</div>
+                                    <div className="row" style={{ marginTop: "15px" }}>
+                                        <div className="col-lg-4"><strong>Type:</strong> {property.type}</div>
+                                        <div className="col-lg-4"><strong>Status:</strong> {property.status}</div>
+                                        <div className="col-lg-4"><strong>Price:</strong> {formattedPrice}</div>
+                                    </div>
+                                    <div className="row" style={{ marginTop: "8px" }}>
+                                        <div className="col-lg-4"><strong>Developer:</strong> {developerName}</div>
+                                        <div className="col-lg-4"><strong>Locality:</strong> {locality}</div>
+                                        <div className="col-lg-4"><strong>Pricing:</strong> {getPricingLabel(property.priceCategory)}</div>
+                                    </div>
+                                    <div className="row" style={{ marginTop: "8px" }}>
+                                        <div className="col-lg-12"><strong>Location:</strong> {location}</div>
+                                    </div>
+                                </div>
 
                                 <div className="fd-item fd-features">
-    <h4>Features</h4>
-    <div className="row">
-        <div className="col-lg-4">
-            <i className="fa fa-check"></i>
-            <span>24x7 Security</span>
-        </div>
-        <div className="col-lg-4">
-            <i className="fa fa-check"></i>
-            <span>Power Backup</span>
-        </div>
-        <div className="col-lg-4">
-            <i className="fa fa-check"></i>
-            <span>Lift Facility</span>
-        </div>
-    </div>
-
-    <div className="row">
-        <div className="col-lg-4">
-            <i className="fa fa-check"></i>
-            <span>Reserved Parking</span>
-        </div>
-        <div className="col-lg-4">
-            <i className="fa fa-check"></i>
-            <span>Children’s Play Area</span>
-        </div>
-        <div className="col-lg-4">
-            <i className="fa fa-check"></i>
-            <span>Garden & Open Space</span>
-        </div>
-    </div>
-
-    <div className="row">
-        <div className="col-lg-4">
-            <i className="fa fa-check"></i>
-            <span>Water Supply</span>
-        </div>
-        <div className="col-lg-4">
-            <i className="fa fa-check"></i>
-            <span>Nearby Metro & Bus</span>
-        </div>
-        <div className="col-lg-4">
-            <i className="fa fa-check"></i>
-            <span>Vastu Compliant</span>
-        </div>
-    </div>
-</div>
+                                    <h4>Features</h4>
+                                    <div className="row">
+                                        {featureHighlights.map((feature) => (
+                                            <div key={feature} className="col-lg-6">
+                                                <i className="fa fa-check"></i><span>{feature}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
 
                                 <div className="fd-item">
-    <h4>Location</h4>
-    <iframe
-        src="https://www.google.com/maps?q=Arthaya,+Dahanukar+Wadi,+Kandivali+West,+Mumbai,+Maharashtra+400067&output=embed"
-        width="100%"
-        height="450"
-        style={{ border: 0 }}
-        loading="lazy"
-        title="Arthaya Kandivali West Location"
-    ></iframe>
-</div>
-
-
+                                    <h4>Bullzy Reality Location</h4>
+                                    <iframe
+                                        src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2978.211394844832!2d72.8459!3d19.1887!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7b6914fe3a8e5%3A0x73f264109c4db9d4!2sMalad%2C%20Malad%20West%2C%20Mumbai%2C%20Maharashtra!5e1!3m2!1sen!2sin!4v1774809719193!5m2!1sen!2sin"
+                                        width="100%"
+                                        height="450"
+                                        style={{ border: 0, borderRadius: "18px" }}
+                                        allowFullScreen
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                        title="Bullzy Reality location"
+                                    ></iframe>
+                                </div>
                             </div>
+
                             <div className="col-lg-4">
                                 <div className="fd-sidebar-item">
-<div className="fd-sidebar-item">
-    <h4 style={{ marginBottom: "15px" }}>Quick Enquiry</h4>
+                                    <h4 style={{ marginBottom: "15px" }}>Quick Enquiry</h4>
 
-    {/* WhatsApp Button */}
-    <a
-        href="https://wa.me/917039443733?text=Hello%20I%20am%20interested%20in%20Arthaya%20Homes"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "16px",
-            borderRadius: "12px",
-            textDecoration: "none",
-            color: "#fff",
-            background: "linear-gradient(135deg, #25D366, #1ebe5d)",
-            boxShadow: "0 10px 25px rgba(37,211,102,0.35)",
-            marginBottom: "12px"
-        }}
-    >
-        <i className="fab fa-whatsapp" style={{ fontSize: "26px" }}></i>
-        <div>
-            <strong>Chat on WhatsApp</strong>
-            <p style={{ margin: 0, fontSize: "13px", opacity: 0.9 }}>
-                Get instant project details
-            </p>
-        </div>
-    </a>
+                                    <a
+                                        href={`https://wa.me/917039443733?text=${whatsappMessage}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "12px",
+                                            padding: "16px",
+                                            borderRadius: "12px",
+                                            textDecoration: "none",
+                                            color: "#fff",
+                                            background: "linear-gradient(135deg, #25D366, #1ebe5d)",
+                                            boxShadow: "0 10px 25px rgba(37,211,102,0.35)",
+                                            marginBottom: "12px"
+                                        }}
+                                    >
+                                        <i className="fab fa-whatsapp" style={{ fontSize: "26px" }}></i>
+                                        <div>
+                                            <strong>Chat on WhatsApp</strong>
+                                            <p style={{ margin: 0, fontSize: "13px", opacity: 0.9 }}>Get instant project details</p>
+                                        </div>
+                                    </a>
 
-    {/* Call Button */}
-    <a
-        href="tel:+917039443733"
-        style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "16px",
-            borderRadius: "12px",
-            textDecoration: "none",
-            color: "#fff",
-            background: "linear-gradient(135deg, #0d6efd, #084298)",
-            boxShadow: "0 10px 25px rgba(13,110,253,0.35)"
-        }}
-    >
-        <i className="fas fa-phone-alt" style={{ fontSize: "22px" }}></i>
-        <div>
-            <strong>Call Now</strong>
-            <p style={{ margin: 0, fontSize: "13px", opacity: 0.9 }}>
-                Speak directly with agent
-            </p>
-        </div>
-    </a>
-</div>
-
-</div>
+                                    <a
+                                        href="tel:+917039443733"
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "12px",
+                                            padding: "16px",
+                                            borderRadius: "12px",
+                                            textDecoration: "none",
+                                            color: "#fff",
+                                            background: "linear-gradient(135deg, #0d6efd, #084298)",
+                                            boxShadow: "0 10px 25px rgba(13,110,253,0.35)"
+                                        }}
+                                    >
+                                        <i className="fas fa-phone-alt" style={{ fontSize: "22px" }}></i>
+                                        <div>
+                                            <strong>Call Now</strong>
+                                            <p style={{ margin: 0, fontSize: "13px", opacity: 0.9 }}>Speak directly with agent</p>
+                                        </div>
+                                    </a>
+                                </div>
 
                                 <div className="fd-sidebar-item">
-    <h4>Category</h4>
-    <ul className="category-ul">
-        <li>2 BHK Apartment</li>
-        <li>Ready to Move</li>
-        <li>Kandivali West</li>
-        <li>Near Metro Station</li>
-        <li>Family-Friendly Homes</li>
-    </ul>
-</div>
+                                    <h4>Category</h4>
+                                    <ul className="category-ul">
+                                        <li>{property.type}</li>
+                                        <li>{property.status}</li>
+                                        <li>{developerName}</li>
+                                        <li>{locality}</li>
+                                        <li>{location}</li>
+                                        <li>{formattedPrice}</li>
+                                        <li>{getPricingLabel(property.priceCategory)}</li>
+                                    </ul>
+                                </div>
 
                                 <div className="fd-sidebar-item">
                                     <h4>Recently Added</h4>
-                                    <div className="recently-item">
-                                        <img src="/img/sample11.png" alt="detail" width="50px" />
-                                        <span>Atharva</span>
-                                    </div>
-                                    <div className="recently-item">
-                                        <img src="/img/sample11.png" alt="detail" width="50px" />
-                                        <span>Lodha</span>
-                                    </div>
-                                    <div className="recently-item">
-                                        <img src="/img/sample12.png" alt="detail" width="50px" />
-                                        <span>Navlai</span>
-                                    </div>
+                                    {recentlyAdded.map((item) => (
+                                        <div className="recently-item" key={item.id}>
+                                            <PropertyImage src={item.image} alt={item.name} className="recently-thumb" />
+                                            <Link to={`/flat/${item.slug}`}><span>{item.name}</span></Link>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -237,7 +271,7 @@ const FlatDetail = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default FlatDetail
+export default FlatDetail;

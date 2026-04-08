@@ -1,58 +1,107 @@
-import React from "react"
-import {Link} from "react-router-dom"
-import bullzzyLogo from "../assets/logo.jpg";
-
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import bullzzyLogo from "../assets/logo2.jpg";
+import "./Header.css";
 
 const Header = () => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isBrandExpanded, setIsBrandExpanded] = useState(true);
+    const [isScrolled, setIsScrolled] = useState(false);
+    const brandCollapseTimeoutRef = useRef(null);
+
+    const queueBrandCollapse = useCallback(() => {
+        if (brandCollapseTimeoutRef.current) {
+            clearTimeout(brandCollapseTimeoutRef.current);
+        }
+        brandCollapseTimeoutRef.current = setTimeout(() => {
+            setIsBrandExpanded(false);
+        }, 2600);
+    }, []);
+
+    useEffect(() => {
+        queueBrandCollapse();
+        return () => {
+            if (brandCollapseTimeoutRef.current) {
+                clearTimeout(brandCollapseTimeoutRef.current);
+            }
+        };
+    }, [queueBrandCollapse]);
+
+    useEffect(() => {
+        const onScroll = () => setIsScrolled(window.scrollY > 12);
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
+    const closeMenus = () => {
+        setIsMenuOpen(false);
+    };
+
+    const onToggleMenu = () => {
+        setIsMenuOpen((prev) => !prev);
+    };
+
+    const onBrandMouseEnter = () => {
+        if (brandCollapseTimeoutRef.current) {
+            clearTimeout(brandCollapseTimeoutRef.current);
+        }
+        setIsBrandExpanded(true);
+    };
+
+    const onBrandMouseLeave = () => {
+        queueBrandCollapse();
+    };
+
     return (
-        
-        <div className="header">
-            <div className="container">
-                <nav className="navbar navbar-expand-lg navbar-light">
-                    <div className="container-fluid">
-                        <Link className="navbar-brand" to="/">
-                            <div className="d-flex align-items-center">
-                            <img 
-                                src={bullzzyLogo}
-                                alt="Bullzzy Realty Logo"
-                                className="logo-img"
-                                style={{ height: "34px" }}
-                            />
-                            <span className="ms-2 brand-text">BULLZZY REALTY</span>
-                            </div>
-                        </Link>
-                        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                            <span className="navbar-toggler-icon"></span>
-                        </button>
-                        <div className="collapse navbar-collapse" id="navbarNav">
-                            <ul className="navbar-nav ms-auto">
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/">Home</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link  className="nav-link" to="/blog">Blog</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link  className="nav-link" to="/about">About</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="#">Category <i className="fas fa-chevron-down"></i></Link>
-                                    <ul className="sub-ul">
-                                        <li><Link to="#">item</Link></li>
-                                        <li><Link to="#">item</Link></li>
-                                        <li><Link to="#">item</Link></li>
-                                    </ul>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/contact">Contact</Link>
-                                </li>
-                            </ul>
-                        </div>
+        <nav className={`header ${isScrolled ? "header-scrolled" : ""}`} aria-label="Primary navigation">
+            <div className="nav-container">
+                <Link className="header-brand header-glass" to="/home" onClick={closeMenus}>
+                    <div
+                        className={`brand-wrap ${isBrandExpanded ? "brand-expanded" : "brand-collapsed"}`}
+                        onMouseEnter={onBrandMouseEnter}
+                        onMouseLeave={onBrandMouseLeave}
+                    >
+                        <span className="logo-shell">
+                            <img src={bullzzyLogo} alt="Bullzzy Realty Logo" className="logo-img" />
+                        </span>
+                        <span className="brand-text-shell">
+                            <span className="brand-text">BULLZY REALTY</span>
+                        </span>
                     </div>
-                </nav>
+                </Link>
+
+                <div className="nav-actions">
+                    <button
+                        className={`header-toggler ${isMenuOpen ? "is-open" : ""}`}
+                        type="button"
+                        aria-controls="primaryNavLinks"
+                        aria-expanded={isMenuOpen}
+                        aria-label="Toggle navigation"
+                        onClick={onToggleMenu}
+                    >
+                        <span className="toggler-line"></span>
+                        <span className="toggler-line"></span>
+                        <span className="toggler-line"></span>
+                    </button>
+
+                    <div
+                        id="primaryNavLinks"
+                        className={`nav-links header-glass ${isMenuOpen ? "is-open" : ""}`}
+                    >
+                        <Link className="nav-link" to="/home" onClick={closeMenus}>Home</Link>
+                        <Link className="nav-link" to="/blog" onClick={closeMenus}>Blog</Link>
+                        <Link className="nav-link" to="/about" onClick={closeMenus}>About</Link>
+                        <Link className="nav-link" to="/contact" onClick={closeMenus}>Contact</Link>
+                    </div>
+
+                    <Link className="nav-cta header-glass" to="/contact" onClick={closeMenus}>
+                        Get Started
+                    </Link>
+                </div>
             </div>
-        </div>
-    )
-}
+        </nav>
+    );
+};
 
 export default Header;

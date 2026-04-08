@@ -1,6 +1,6 @@
 const TeamItem = () => {
     return (
-        <div className="col-lg-4">
+        <div className="col-12 col-md-6 col-lg-4">
             <div className="team">
                 <div className="team-img">
                     <img src="/img/team.jpg" alt="team" />
