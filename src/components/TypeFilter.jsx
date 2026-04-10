@@ -1,21 +1,16 @@
-import { propertyTypeOptions } from "../data/propertySearchData";
-
-export const typeFilters = [
-    { label: "All Types", value: "all" },
-    ...propertyTypeOptions.map((type) => ({ label: type, value: type }))
-];
+import FilterDropdown from "./FilterDropdown";
+import { typeFilters } from "../data/filterOptions";
 
 const TypeFilter = ({ value, onChange }) => {
     return (
-        <div className="budget-filter-area">
-            <select className="budget-select" value={value} onChange={onChange}>
-                {typeFilters.map((item) => (
-                    <option key={item.value} value={item.value}>
-                        {item.label}
-                    </option>
-                ))}
-            </select>
-        </div>
+        <FilterDropdown
+            className="budget-filter-area"
+            triggerClassName="budget-select"
+            ariaLabel="Type filter"
+            value={value}
+            onChange={onChange}
+            options={typeFilters}
+        />
     );
 };
 

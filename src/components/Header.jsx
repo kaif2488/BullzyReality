@@ -94,10 +94,6 @@ const Header = () => {
                         <Link className="nav-link" to="/about" onClick={closeMenus}>About</Link>
                         <Link className="nav-link" to="/contact" onClick={closeMenus}>Contact</Link>
                     </div>
-
-                    <Link className="nav-cta header-glass" to="/contact" onClick={closeMenus}>
-                        Get Started
-                    </Link>
                 </div>
             </div>
         </nav>

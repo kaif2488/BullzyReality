@@ -1,21 +1,16 @@
-import { propertyStatusOptions } from "../data/propertySearchData";
-
-export const statusFilters = [
-    { label: "All Status", value: "all" },
-    ...propertyStatusOptions.map((status) => ({ label: status, value: status }))
-];
+import FilterDropdown from "./FilterDropdown";
+import { statusFilters } from "../data/filterOptions";
 
 const StatusFilter = ({ value, onChange }) => {
     return (
-        <div className="budget-filter-area">
-            <select className="budget-select" value={value} onChange={onChange}>
-                {statusFilters.map((item) => (
-                    <option key={item.value} value={item.value}>
-                        {item.label}
-                    </option>
-                ))}
-            </select>
-        </div>
+        <FilterDropdown
+            className="budget-filter-area"
+            triggerClassName="budget-select"
+            ariaLabel="Status filter"
+            value={value}
+            onChange={onChange}
+            options={statusFilters}
+        />
     );
 };
 

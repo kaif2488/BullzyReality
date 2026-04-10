@@ -2,7 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import FlatItem from "./FlatItem";
 import Title from "./Title";
 import propertySearchData from "../data/propertySearchData";
-import { budgetFilters } from "./BudgetFilter";
+import { budgetFilters } from "../data/filterOptions";
 
 const SearchResults = () => {
     const [searchParams] = useSearchParams();
