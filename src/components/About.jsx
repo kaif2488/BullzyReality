@@ -6,6 +6,7 @@ const About = () => {
     const facebookPageUrl = "https://www.facebook.com/Bullzyrealty/";
     const linkedInUrl = "https://share.google/933nfR37riazmbKwk";
     const instagramUrl = "https://share.google/IjBMi5caEFgp6rolY";
+    const youtubeUrl = "https://www.youtube.com/@Bullzyrealty";
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
         "Hello Bullzy Realty, I want property guidance."
     )}`;
@@ -41,6 +42,14 @@ const About = () => {
             link: linkedInUrl,
             buttonText: "Connect",
             tone: "is-linkedin"
+        },
+        {
+            label: "YouTube",
+            handle: "@Bullzyrealty",
+            icon: "fab fa-youtube",
+            link: youtubeUrl,
+            buttonText: "Watch Channel",
+            tone: "is-youtube"
         }
     ];
 

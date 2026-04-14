@@ -187,13 +187,14 @@ const FlatList = ({ properties = [] }) => {
 
                 <div className="insight-block">
                     <h4 className="insight-heading">Featured Properties</h4>
+                    <p className="insight-swipe-hint">Swipe right to see more</p>
                     <div className="insight-featured-grid">
                         <div className="insight-featured-row">
                             {featuredFirstRow.map((property) => (
                                 <Link key={property.id} className="insight-card-link" to={`/flat/${property.slug}`}>
                                     <article className="insight-card">
                                         <div className="insight-card-image">
-                                            <img src={property.image} alt={property.name} onError={handlePropertyImageError} />
+                                            <img src={property.image || propertyImageFallback} alt={property.name} className="img-fluid" onError={handlePropertyImageError} />
                                         </div>
                                         <h5 className="insight-card-title">{property.name}</h5>
                                         <p className="insight-metric">{property.locality}</p>
@@ -210,7 +211,7 @@ const FlatList = ({ properties = [] }) => {
                                 <Link key={property.id} className="insight-card-link" to={`/flat/${property.slug}`}>
                                     <article className="insight-card">
                                         <div className="insight-card-image">
-                                            <img src={property.image} alt={property.name} onError={handlePropertyImageError} />
+                                            <img src={property.image || propertyImageFallback} alt={property.name} className="img-fluid" onError={handlePropertyImageError} />
                                         </div>
                                         <h5 className="insight-card-title">{property.name}</h5>
                                         <p className="insight-metric">{property.locality}</p>
@@ -230,10 +231,56 @@ const FlatList = ({ properties = [] }) => {
                             </Link>
                         </div>
                     </div>
+
+                    <div className="insight-featured-mobile-stack">
+                        <div className="insight-featured-mobile-row">
+                            {featuredFirstRow.map((property) => (
+                                <Link key={property.id} className="insight-card-link" to={`/flat/${property.slug}`}>
+                                    <article className="insight-card insight-mobile-card">
+                                        <div className="insight-card-image">
+                                            <img src={property.image || propertyImageFallback} alt={property.name} className="img-fluid" onError={handlePropertyImageError} />
+                                        </div>
+                                        <h5 className="insight-card-title">{property.name}</h5>
+                                        <p className="insight-metric">{property.locality}</p>
+                                        <p className="insight-meta">{property.developerName}</p>
+                                        <p className="insight-meta">{property.type} | {property.status}</p>
+                                        <p className="insight-cost">{property.priceLabel}</p>
+                                    </article>
+                                </Link>
+                            ))}
+                        </div>
+
+                        <div className="insight-featured-mobile-row">
+                            {featuredSecondRow.map((property) => (
+                                <Link key={property.id} className="insight-card-link" to={`/flat/${property.slug}`}>
+                                    <article className="insight-card insight-mobile-card">
+                                        <div className="insight-card-image">
+                                            <img src={property.image || propertyImageFallback} alt={property.name} className="img-fluid" onError={handlePropertyImageError} />
+                                        </div>
+                                        <h5 className="insight-card-title">{property.name}</h5>
+                                        <p className="insight-metric">{property.locality}</p>
+                                        <p className="insight-meta">{property.developerName}</p>
+                                        <p className="insight-meta">{property.type} | {property.status}</p>
+                                        <p className="insight-cost">{property.priceLabel}</p>
+                                    </article>
+                                </Link>
+                            ))}
+
+                            <Link className="insight-card-link" to="/search">
+                                <article className="insight-card insight-more-card insight-mobile-card">
+                                    <p className="insight-more-label">More</p>
+                                    <h5 className="insight-card-title insight-more-title">View All Properties</h5>
+                                    <p className="insight-meta">Open search results with all records</p>
+                                    <p className="insight-cost">{properties.length} total listings</p>
+                                </article>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="insight-block">
                     <h4 className="insight-heading">Top Developers</h4>
+                    <p className="insight-swipe-hint">Swipe right to see more</p>
                     <div
                         className="insight-scroll"
                         ref={developerScrollRef}
@@ -282,6 +329,7 @@ const FlatList = ({ properties = [] }) => {
 
                 <div className="insight-block">
                     <h4 className="insight-heading">Top Localities</h4>
+                    <p className="insight-swipe-hint">Swipe right to see more</p>
                     <div
                         className="insight-scroll"
                         ref={localityScrollRef}

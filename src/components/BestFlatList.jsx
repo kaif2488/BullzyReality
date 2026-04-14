@@ -15,7 +15,7 @@ export default class BestFlatList extends Component {
             slidesToShow: 4,
             slidesToScroll: 1,
             autoPlay: true,
-            arrows: false,
+            arrows: true,
             responsive: [
                 {
                     breakpoint: 1024,

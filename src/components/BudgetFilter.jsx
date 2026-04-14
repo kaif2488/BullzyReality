@@ -1,3 +1,5 @@
+import CustomFilterDropdown from "./CustomFilterDropdown";
+
 export const budgetFilters = [
     { label: "All Budgets", value: "all", min: 0, max: null },
     { label: "Up to \u20B91 Cr", value: "upto-1cr", min: 0, max: 10000000 },
@@ -8,15 +10,7 @@ export const budgetFilters = [
 
 const BudgetFilter = ({ value, onChange }) => {
     return (
-        <div className="budget-filter-area">
-            <select className="budget-select" value={value} onChange={onChange}>
-                {budgetFilters.map((range) => (
-                    <option key={range.value} value={range.value}>
-                        {range.label}
-                    </option>
-                ))}
-            </select>
-        </div>
+        <CustomFilterDropdown value={value} onChange={onChange} options={budgetFilters} placeholder="All Budgets" />
     );
 };
 

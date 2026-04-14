@@ -1,4 +1,5 @@
 import { propertyStatusOptions } from "../data/propertySearchData";
+import CustomFilterDropdown from "./CustomFilterDropdown";
 
 export const statusFilters = [
     { label: "All Status", value: "all" },
@@ -7,15 +8,7 @@ export const statusFilters = [
 
 const StatusFilter = ({ value, onChange }) => {
     return (
-        <div className="budget-filter-area">
-            <select className="budget-select" value={value} onChange={onChange}>
-                {statusFilters.map((item) => (
-                    <option key={item.value} value={item.value}>
-                        {item.label}
-                    </option>
-                ))}
-            </select>
-        </div>
+        <CustomFilterDropdown value={value} onChange={onChange} options={statusFilters} placeholder="All Status" />
     );
 };
 

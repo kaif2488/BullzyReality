@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import Slider from "react-slick";
 import FlatItem from "./FlatItem";
 import Title from "./Title";
 import propertySearchData from "../data/propertySearchData";
@@ -7,7 +8,36 @@ import propertySearchData from "../data/propertySearchData";
 const DeveloperProjects = () => {
     const [searchParams] = useSearchParams();
     const developer = (searchParams.get("developer") || "").trim();
-    const sliderRefs = useRef({});
+
+    const sliderSettings = {
+        infinite: true,
+        speed: 1500,
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 3200,
+        arrows: true,
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                    infinite: true,
+                    arrows: true
+                }
+            },
+            {
+                breakpoint: 800,
+                settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                    infinite: true,
+                    arrows: true
+                }
+            }
+        ]
+    };
 
     const developerProjects = useMemo(() => {
         if (!developer) {
@@ -42,37 +72,6 @@ const DeveloperProjects = () => {
         ? `Found ${developerProjects.length} projects`
         : `Found ${developerProjects.length} projects across ${uniqueDeveloperCount} developers (A-Z)`;
 
-    useEffect(() => {
-        if (developer) return undefined;
-
-        const sliderRows = Object.entries(sliderRefs.current).filter(
-            ([, element]) => element && Number(element.dataset.count || 0) > 3
-        );
-
-        const intervals = sliderRows.map(([, element]) =>
-            setInterval(() => {
-                if (!element) return;
-
-                const firstCard = element.querySelector(".location-slider-item");
-                if (!firstCard) return;
-
-                const maxScroll = element.scrollWidth - element.clientWidth;
-                if (maxScroll <= 0) return;
-
-                const rowGap = parseFloat(window.getComputedStyle(element).columnGap || "12") || 12;
-                const step = firstCard.getBoundingClientRect().width + rowGap;
-                const nextLeft = element.scrollLeft + step;
-                const targetLeft = nextLeft >= maxScroll - 2 ? 0 : nextLeft;
-
-                element.scrollTo({ left: targetLeft, behavior: "smooth" });
-            }, 3200)
-        );
-
-        return () => {
-            intervals.forEach((intervalId) => clearInterval(intervalId));
-        };
-    }, [developer, groupedByDeveloper]);
-
     return (
         <section className="section-all-re page-content">
             <div className="container">
@@ -91,25 +90,13 @@ const DeveloperProjects = () => {
                             <div key={developerName} className="mb-4">
                                 <h4 className="insight-heading mb-3">{developerName}</h4>
                                 {properties.length > 3 ? (
-                                    <div className="location-slider-wrap">
-                                        <div
-                                            className="location-slider-row"
-                                            ref={(element) => {
-                                                if (element) {
-                                                    sliderRefs.current[developerName] = element;
-                                                } else {
-                                                    delete sliderRefs.current[developerName];
-                                                }
-                                            }}
-                                            data-count={properties.length}
-                                        >
-                                            {properties.map((property) => (
-                                                <div key={property.id} className="location-slider-item">
-                                                    <FlatItem property={property} />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
+                                    <Slider {...sliderSettings}>
+                                        {properties.map((property) => (
+                                            <div key={property.id} className="slider-flat-item">
+                                                <FlatItem property={property} wrapperClass="text-center" />
+                                            </div>
+                                        ))}
+                                    </Slider>
                                 ) : (
                                     <div className="row">
                                         {properties.map((property) => (

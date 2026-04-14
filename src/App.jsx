@@ -11,8 +11,7 @@ import BlogDetail from "./components/BlogDetail.jsx";
 import SearchResults from "./components/SearchResults.jsx";
 import DeveloperProjects from "./components/DeveloperProjects.jsx";
 import LocationProjects from "./components/LocationProjects.jsx";
-import IntroSplash from "./components/IntroSplash.jsx";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 const ScrollToTop = () => {
   const location = useLocation();
@@ -28,15 +27,12 @@ const ScrollToTop = () => {
 };
 
 function App() {
-  const location = useLocation();
-  const isIntroPage = location.pathname === "/";
-
   return (
     <div className="App">
       <ScrollToTop />
-      {!isIntroPage && <Header />}
+      <Header />
       <Routes>
-        <Route path="/" element={<IntroSplash />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<Home />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
@@ -47,7 +43,7 @@ function App() {
         <Route path="/location-projects" element={<LocationProjects />} />
         <Route path="/flat/:slug" element={<FlatDetail />} />
       </Routes>
-      {!isIntroPage && <Footer />}
+      <Footer />
     </div>
   );
 }

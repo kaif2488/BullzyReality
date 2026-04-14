@@ -23,6 +23,8 @@ const handlePropertyImageError = (event) => {
     event.currentTarget.src = propertyImageFallback;
 };
 
+const contactMapLink = "https://maps.app.goo.gl/pveTEZHtRhx9zai86";
+
 const FlatDetail = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
@@ -50,10 +52,9 @@ const FlatDetail = () => {
         );
     }
 
-    const images = (property.images?.length ? property.images : [propertyImageFallback]).map((image) => ({
-        original: image || propertyImageFallback,
-        thumbnail: image || propertyImageFallback
-    }));
+    const galleryItems = property.images?.length
+        ? property.images.map((image) => ({ original: image, thumbnail: image }))
+        : [{ original: propertyImageFallback, thumbnail: propertyImageFallback }];
 
     const recentlyAdded = propertySearchData.filter((item) => item.slug !== property.slug).slice(0, 3);
 
@@ -65,7 +66,20 @@ const FlatDetail = () => {
         ? property.featureHighlights
         : [property.type, property.status, locality, developerName].filter(Boolean);
 
-    const whatsappMessage = encodeURIComponent(`Hello, I am interested in ${property.name} in ${location}`);
+    const whatsappMessage = encodeURIComponent(
+        [
+            "Hello, I'm interested in this property.",
+            "",
+            `Property: ${property.name}`,
+            `Location: ${location}`,
+            `Developer: ${developerName}`,
+            `Type: ${property.type}`,
+            `Status: ${property.status}`,
+            `Price: ${formattedPrice}`,
+            "",
+            "Please share more details, brochure, and site visit availability."
+        ].join("\n")
+    );
 
     const setUserSlideInterval = () => {
         setSlideIntervalMs((previous) => (previous === 10000 ? previous : 10000));
@@ -105,31 +119,18 @@ const FlatDetail = () => {
                             slideDuration={500}
                             slideInterval={slideIntervalMs}
                             autoPlay={true}
-                            items={images}
+                            items={galleryItems}
                             showNav={false}
                             showFullscreenButton={false}
                             showPlayButton={false}
                             onClick={setUserSlideInterval}
                             onTouchStart={setUserSlideInterval}
                             onThumbnailClick={setUserSlideInterval}
-                            renderItem={(item) => (
-                                <img
-                                    src={item.original || propertyImageFallback}
-                                    alt={property.name}
-                                    className="image-gallery-image"
-                                    onError={handlePropertyImageError}
-                                />
-                            )}
-                            renderThumbInner={(item) => (
-                                <img
-                                    src={item.thumbnail || propertyImageFallback}
-                                    alt={`${property.name} thumbnail`}
-                                    onError={handlePropertyImageError}
-                                />
-                            )}
+                            renderItem={(item) => <img src={item.original || propertyImageFallback} alt={property.name} className="img-fluid" onError={handlePropertyImageError} />}
+                            renderThumbInner={(item) => <img src={item.thumbnail || propertyImageFallback} alt={`${property.name} thumbnail`} onError={handlePropertyImageError} />}
                         />
 
-                        <div className="row">
+                        <div className="row" style={{ marginTop: "30px" }}>
                             <div className="col-lg-8">
                                 <div className="fd-item">
                                     <h4>Overview and Property Details</h4>
@@ -166,14 +167,16 @@ const FlatDetail = () => {
                                 </div>
 
                                 <div className="fd-item">
-                                    <h4>Location</h4>
+                                    <h4>Bullzy Reality Location</h4>
                                     <iframe
-                                        src={`https://www.google.com/maps?q=${encodeURIComponent(`${property.name} ${location}`)}&output=embed`}
+                                        src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2978.211394844832!2d72.8459!3d19.1887!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7b6914fe3a8e5%3A0x73f264109c4db9d4!2sMalad%2C%20Malad%20West%2C%20Mumbai%2C%20Maharashtra!5e1!3m2!1sen!2sin!4v1774809719193!5m2!1sen!2sin"
                                         width="100%"
                                         height="450"
-                                        style={{ border: 0 }}
+                                        style={{ border: 0, borderRadius: "18px" }}
+                                        allowFullScreen
                                         loading="lazy"
-                                        title={`${property.name} location`}
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                        title="Bullzy Reality location"
                                     ></iframe>
                                 </div>
                             </div>

@@ -13,7 +13,7 @@ const References = () => {
         slidesToShow: 5,
         slidesToScroll: 1,
         autoPlay: true,
-        arrows: false,
+        arrows: true,
         responsive: [
             {
                 breakpoint: 1024,

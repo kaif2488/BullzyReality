@@ -319,7 +319,7 @@ const extractDriveId = (value = "") => {
     return "";
 };
 
-const toDriveImageUrl = (value, index) => {
+const toDriveThumbnailUrl = (value, index) => {
     const driveId = extractDriveId(value);
     if (!driveId) {
         return fallbackImages[index % fallbackImages.length];
@@ -333,8 +333,8 @@ const parseImageList = (value = "") => {
         ? value.split(",").map((item) => normalizeWhitespace(item)).filter(Boolean)
         : [];
 
-    const resolvedImages = imageLinks.map((item, index) => toDriveImageUrl(item, index));
-    return resolvedImages.length > 0 ? resolvedImages : [propertyImageFallback];
+    const thumbnails = imageLinks.map((item, index) => toDriveThumbnailUrl(item, index));
+    return thumbnails.length > 0 ? thumbnails : fallbackImages;
 };
 
 const formatCurrencyShort = (amount) => {

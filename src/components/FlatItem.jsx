@@ -1,19 +1,19 @@
 import { Link } from "react-router-dom";
 import { propertyImageFallback } from "../data/propertySearchData";
 
-const handlePropertyImageError = (event) => {
-    event.currentTarget.onerror = null;
-    event.currentTarget.src = propertyImageFallback;
-};
-
-const FlatItem = ({ property }) => {
+const FlatItem = ({ property, wrapperClass = "text-center col-lg-4 col-12 col-md-6" }) => {
     if (!property) return null;
 
+    const handleImageError = (event) => {
+        event.currentTarget.onerror = null;
+        event.currentTarget.src = propertyImageFallback;
+    };
+
     return (
-        <div className="text-center col-lg-4 col-12 col-md-6">
+        <div className={wrapperClass}>
             <div className="item">
                 <div className="item-image">
-                    <img className="img-fluid" src={property.image} alt={property.name} onError={handlePropertyImageError} />
+                    <img src={property.image || propertyImageFallback} alt={property.name} className="img-fluid" onError={handleImageError} />
                 </div>
                 <div className="item-description">
                     <div className="d-flex justify-content-between mb-3">

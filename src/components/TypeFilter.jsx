@@ -1,4 +1,5 @@
 import { propertyTypeOptions } from "../data/propertySearchData";
+import CustomFilterDropdown from "./CustomFilterDropdown";
 
 export const typeFilters = [
     { label: "All Types", value: "all" },
@@ -7,15 +8,7 @@ export const typeFilters = [
 
 const TypeFilter = ({ value, onChange }) => {
     return (
-        <div className="budget-filter-area">
-            <select className="budget-select" value={value} onChange={onChange}>
-                {typeFilters.map((item) => (
-                    <option key={item.value} value={item.value}>
-                        {item.label}
-                    </option>
-                ))}
-            </select>
-        </div>
+        <CustomFilterDropdown value={value} onChange={onChange} options={typeFilters} placeholder="All Types" />
     );
 };
 

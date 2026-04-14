@@ -49,23 +49,42 @@ const Contact = () => {
                             <div className="row contact-info-row g-3">
                                 <div className="col-12 col-md-6 col-lg-4 d-flex">
                                     <div className="contact-item">
-                                        <i className="fas fa-envelope"></i>
-                                        <h5>Mail</h5>
-                                        <h6>bullzyreality@gmail.com</h6>
+                                        <span className="contact-item-icon" aria-hidden="true">
+                                            <i className="fas fa-envelope"></i>
+                                        </span>
+                                        <div className="contact-item-body">
+                                            <p className="contact-item-label">Mail</p>
+                                            <a className="contact-item-value" href="mailto:bullzyreality@gmail.com">
+                                                bullzyreality@gmail.com
+                                            </a>
+                                            <p className="contact-item-note">Brochures, documents, and detailed property support</p>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="col-12 col-md-6 col-lg-4 d-flex">
                                     <div className="contact-item">
-                                        <i className="fas fa-map-marker-alt"></i>
-                                        <h5>Address</h5>
-                                        <h6>Mumbai</h6>
+                                        <span className="contact-item-icon" aria-hidden="true">
+                                            <i className="fas fa-map-marker-alt"></i>
+                                        </span>
+                                        <div className="contact-item-body">
+                                            <p className="contact-item-label">Address</p>
+                                            <p className="contact-item-value">Mumbai</p>
+                                            <p className="contact-item-note">Buyer guidance and project assistance across Mumbai</p>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="col-12 col-md-6 col-lg-4 d-flex">
                                     <div className="contact-item">
-                                        <i className="fas fa-phone-alt"></i>
-                                        <h5>Phone</h5>
-                                        <h6>70394 43733</h6>
+                                        <span className="contact-item-icon" aria-hidden="true">
+                                            <i className="fas fa-phone-alt"></i>
+                                        </span>
+                                        <div className="contact-item-body">
+                                            <p className="contact-item-label">Phone</p>
+                                            <a className="contact-item-value" href="tel:+917039443733">
+                                                70394 43733
+                                            </a>
+                                            <p className="contact-item-note">Fast response for site visits and property enquiries</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
