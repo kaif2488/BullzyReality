@@ -10,46 +10,29 @@ const Header = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const headerRef = useRef(null);
     const brandCollapseTimeoutRef = useRef(null);
-    const menuCloseTimeoutRef = useRef(null);
     const isHomePage = location.pathname === "/home";
 
-    const clearMenuCloseTimeout = useCallback(() => {
-        if (menuCloseTimeoutRef.current) {
-            clearTimeout(menuCloseTimeoutRef.current);
-            menuCloseTimeoutRef.current = null;
-        }
-    }, []);
-
-    const queueMenuClose = useCallback(() => {
-        clearMenuCloseTimeout();
-        menuCloseTimeoutRef.current = setTimeout(() => {
-            setIsMenuOpen(false);
-        }, 5000);
-    }, [clearMenuCloseTimeout]);
-
-    const queueBrandCollapse = useCallback(() => {
+    const clearBrandCollapseTimeout = useCallback(() => {
         if (brandCollapseTimeoutRef.current) {
             clearTimeout(brandCollapseTimeoutRef.current);
+            brandCollapseTimeoutRef.current = null;
         }
+    }, []);
+
+    const queueBrandCollapse = useCallback(() => {
+        clearBrandCollapseTimeout();
         brandCollapseTimeoutRef.current = setTimeout(() => {
             setIsBrandExpanded(false);
-        }, 2600);
-    }, []);
+        }, 3000);
+    }, [clearBrandCollapseTimeout]);
 
     useEffect(() => {
         queueBrandCollapse();
-        return () => {
-            if (brandCollapseTimeoutRef.current) {
-                clearTimeout(brandCollapseTimeoutRef.current);
-            }
-        };
-    }, [queueBrandCollapse]);
 
-    useEffect(() => {
         return () => {
-            clearMenuCloseTimeout();
+            clearBrandCollapseTimeout();
         };
-    }, [clearMenuCloseTimeout]);
+    }, [clearBrandCollapseTimeout, queueBrandCollapse]);
 
     useEffect(() => {
         const onScroll = () => {
@@ -65,9 +48,8 @@ const Header = () => {
     }, []);
 
     const closeMenus = useCallback(() => {
-        clearMenuCloseTimeout();
         setIsMenuOpen(false);
-    }, [clearMenuCloseTimeout]);
+    }, []);
 
     useEffect(() => {
         closeMenus();
@@ -75,11 +57,8 @@ const Header = () => {
 
     useEffect(() => {
         if (!isMenuOpen) {
-            clearMenuCloseTimeout();
             return undefined;
         }
-
-        queueMenuClose();
 
         const onPointerDown = (event) => {
             if (!headerRef.current?.contains(event.target)) {
@@ -87,37 +66,38 @@ const Header = () => {
             }
         };
 
-        const onScrollClose = () => {
-            closeMenus();
+        const onKeyDown = (event) => {
+            if (event.key === "Escape") {
+                closeMenus();
+            }
         };
 
         document.addEventListener("pointerdown", onPointerDown);
-        window.addEventListener("scroll", onScrollClose, { passive: true });
+        document.addEventListener("keydown", onKeyDown);
 
         return () => {
             document.removeEventListener("pointerdown", onPointerDown);
-            window.removeEventListener("scroll", onScrollClose);
+            document.removeEventListener("keydown", onKeyDown);
         };
-    }, [isMenuOpen, closeMenus, clearMenuCloseTimeout, queueMenuClose]);
+    }, [isMenuOpen, closeMenus]);
 
     const onToggleMenu = () => {
         setIsMenuOpen((prev) => !prev);
     };
 
-    const onMenuInteraction = () => {
-        if (!isMenuOpen) return;
-        queueMenuClose();
-    };
-
-    const onBrandMouseEnter = () => {
-        if (brandCollapseTimeoutRef.current) {
-            clearTimeout(brandCollapseTimeoutRef.current);
-        }
+    const expandBrand = () => {
+        clearBrandCollapseTimeout();
         setIsBrandExpanded(true);
     };
 
-    const onBrandMouseLeave = () => {
+    const collapseBrandAfterDelay = () => {
         queueBrandCollapse();
+    };
+
+    const onBrandBlur = (event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+            collapseBrandAfterDelay();
+        }
     };
 
     return (
@@ -125,12 +105,16 @@ const Header = () => {
             <div className="container">
                 <nav className="navbar navbar-expand-lg navbar-light">
                     <div className="container-fluid">
-                        <Link className="navbar-brand header-brand" to="/home" onClick={closeMenus}>
-                            <div
-                                className={`d-flex align-items-center brand-wrap ${isBrandExpanded ? "brand-expanded" : "brand-collapsed"}`}
-                                onMouseEnter={onBrandMouseEnter}
-                                onMouseLeave={onBrandMouseLeave}
-                            >
+                        <Link
+                            className="navbar-brand header-brand"
+                            to="/home"
+                            onBlur={onBrandBlur}
+                            onClick={closeMenus}
+                            onFocus={expandBrand}
+                            onMouseEnter={expandBrand}
+                            onMouseLeave={collapseBrandAfterDelay}
+                        >
+                            <div className={`d-flex align-items-center brand-wrap ${isBrandExpanded ? "brand-expanded" : "brand-collapsed"}`}>
                                 <span className="logo-shell">
                                     <img src={bullzzyLogo} alt="Bullzzy Realty Logo" className="logo-img" />
                                 </span>
@@ -156,8 +140,6 @@ const Header = () => {
                         <div
                             className={`collapse navbar-collapse header-collapse ${isMenuOpen ? "show" : ""}`}
                             id="navbarNav"
-                            onPointerDown={onMenuInteraction}
-                            onPointerMove={onMenuInteraction}
                         >
                             <ul className="navbar-nav ms-auto header-nav-links">
                                 <li className="nav-item">

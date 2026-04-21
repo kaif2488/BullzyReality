@@ -23,12 +23,15 @@ const handlePropertyImageError = (event) => {
     event.currentTarget.src = propertyImageFallback;
 };
 
+const getGalleryItemKey = (item) => item.driveId || item.sourceUrl || item.previewUrl || item.original || item.thumbnail;
+
 const contactMapLink = "https://maps.app.goo.gl/pveTEZHtRhx9zai86";
 
 const FlatDetail = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
     const [slideIntervalMs, setSlideIntervalMs] = useState(5000);
+    const [activeDrivePreviewKey, setActiveDrivePreviewKey] = useState("");
 
     const property = propertySearchData.find((item) => item.slug === slug);
 
@@ -52,10 +55,16 @@ const FlatDetail = () => {
         );
     }
 
-    const galleryItems = property.images?.length
-        ? property.images.map((image) => ({ original: image, thumbnail: image }))
-        : [{ original: propertyImageFallback, thumbnail: propertyImageFallback }];
-
+    const galleryItems = property.media?.length
+        ? property.media.map((item, index) => ({
+            ...item,
+            original: item.original || item.thumbnail || propertyImageFallback,
+            thumbnail: item.thumbnail || item.original || propertyImageFallback,
+            galleryKey: getGalleryItemKey(item) || `${property.slug || property.name}-media-${index}`
+        }))
+        : property.images?.length
+            ? property.images.map((image, index) => ({ type: "image", original: image, thumbnail: image, galleryKey: `${property.slug || property.name}-image-${index}` }))
+        : [{ original: propertyImageFallback, thumbnail: propertyImageFallback, galleryKey: `${property.slug || property.name}-fallback` }];
     const recentlyAdded = propertySearchData.filter((item) => item.slug !== property.slug).slice(0, 3);
 
     const formattedPrice = property.priceLabel || "Price on request";
@@ -83,6 +92,19 @@ const FlatDetail = () => {
 
     const setUserSlideInterval = () => {
         setSlideIntervalMs((previous) => (previous === 10000 ? previous : 10000));
+    };
+
+    const openDrivePreview = (event, item) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setUserSlideInterval();
+        setActiveDrivePreviewKey(item.galleryKey);
+    };
+
+    const closeDrivePreview = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setActiveDrivePreviewKey("");
     };
 
     return (
@@ -114,21 +136,95 @@ const FlatDetail = () => {
                             </div>
                         </div>
 
-                        <ImageGallery
-                            flickThreshold={0.5}
-                            slideDuration={500}
-                            slideInterval={slideIntervalMs}
-                            autoPlay={true}
-                            items={galleryItems}
-                            showNav={false}
-                            showFullscreenButton={false}
-                            showPlayButton={false}
-                            onClick={setUserSlideInterval}
-                            onTouchStart={setUserSlideInterval}
-                            onThumbnailClick={setUserSlideInterval}
-                            renderItem={(item) => <img src={item.original || propertyImageFallback} alt={property.name} className="img-fluid" onError={handlePropertyImageError} />}
-                            renderThumbInner={(item) => <img src={item.thumbnail || propertyImageFallback} alt={`${property.name} thumbnail`} onError={handlePropertyImageError} />}
-                        />
+                        <div className={`fd-gallery-wrapper ${activeDrivePreviewKey ? "fd-gallery-preview-active" : ""}`}>
+                            <ImageGallery
+                                flickThreshold={0.5}
+                                slideDuration={500}
+                                slideInterval={slideIntervalMs}
+                                autoPlay={!activeDrivePreviewKey}
+                                items={galleryItems}
+                                showNav={galleryItems.length > 1}
+                                showBullets={galleryItems.length > 1}
+                                showIndex={galleryItems.length > 1}
+                                showThumbnails={galleryItems.length > 1}
+                                showFullscreenButton={false}
+                                showPlayButton={false}
+                                thumbnailPosition="bottom"
+                                lazyLoad={true}
+                                additionalClass="fd-image-gallery"
+                                onClick={setUserSlideInterval}
+                                onTouchStart={setUserSlideInterval}
+                                onSlide={() => setActiveDrivePreviewKey("")}
+                                onThumbnailClick={() => {
+                                    setActiveDrivePreviewKey("");
+                                    setUserSlideInterval();
+                                }}
+                                renderItem={(item) => (
+                                    <div className={`fd-gallery-slide-frame ${item.type === "video" || activeDrivePreviewKey === item.galleryKey ? "fd-gallery-video-frame" : ""}`}>
+                                        {item.type === "video" ? (
+                                            <>
+                                                <video className="fd-gallery-video" controls playsInline preload="metadata" poster={item.thumbnail || propertyImageFallback}>
+                                                    <source src={item.videoUrl || item.original} />
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                                <span className="fd-media-badge">
+                                                    <i className="fas fa-play"></i>
+                                                    Video
+                                                </span>
+                                            </>
+                                        ) : activeDrivePreviewKey === item.galleryKey && item.previewUrl ? (
+                                            <>
+                                                <iframe
+                                                    src={item.previewUrl}
+                                                    title={`${property.name} media preview`}
+                                                    className="fd-gallery-drive-preview"
+                                                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                                                    allowFullScreen
+                                                    loading="lazy"
+                                                ></iframe>
+                                                <button type="button" className="fd-preview-close-btn" onClick={closeDrivePreview}>
+                                                    <i className="fas fa-times"></i>
+                                                    Close Preview
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <img
+                                                    src={item.original || propertyImageFallback}
+                                                    alt={property.name}
+                                                    className="fd-gallery-image"
+                                                    onError={handlePropertyImageError}
+                                                />
+                                                {item.type === "drive" && item.previewUrl ? (
+                                                    <button
+                                                        type="button"
+                                                        className="fd-media-badge fd-drive-preview-link"
+                                                        onClick={(event) => openDrivePreview(event, item)}
+                                                    >
+                                                        <i className="fas fa-play"></i>
+                                                        Play Here
+                                                    </button>
+                                                ) : null}
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                                renderThumbInner={(item) => (
+                                    <span className="fd-gallery-thumb-frame">
+                                        <img
+                                            src={item.thumbnail || propertyImageFallback}
+                                            alt={`${property.name} thumbnail`}
+                                            onError={handlePropertyImageError}
+                                        />
+                                        {item.type === "video" || item.type === "drive" ? (
+                                            <span className="fd-gallery-thumb-media">
+                                                <i className="fas fa-play"></i>
+                                            </span>
+                                        ) : null}
+                                    </span>
+                                )}
+                            />
+                        </div>
 
                         <div className="row" style={{ marginTop: "30px" }}>
                             <div className="col-lg-8">
@@ -244,13 +340,39 @@ const FlatDetail = () => {
                                     </ul>
                                 </div>
 
-                                <div className="fd-sidebar-item">
-                                    <h4>Recently Added</h4>
-                                    {recentlyAdded.map((item) => (
-                                        <div className="recently-item" key={item.id}>
-                                            <img src={item.image} alt={item.name} width="50" onError={handlePropertyImageError} />
-                                            <Link to={`/flat/${item.slug}`}><span>{item.name}</span></Link>
+                                <div className="fd-sidebar-item fd-recently-added-card">
+                                    <div className="fd-sidebar-heading">
+                                        <div>
+                                            <span className="fd-sidebar-eyebrow">Fresh picks</span>
+                                            <h4>Recently Added</h4>
                                         </div>
+                                        <span className="fd-recent-count">{recentlyAdded.length}</span>
+                                    </div>
+                                    {recentlyAdded.map((item) => (
+                                        <Link className="recently-item" to={`/flat/${item.slug}`} key={item.id}>
+                                            <span className="recently-item-img-wrap">
+                                                <img src={item.image || propertyImageFallback} alt={item.name} onError={handlePropertyImageError} />
+                                                {item.imageCount > 1 ? <span className="recently-photo-count">{item.imageCount} Photos</span> : null}
+                                            </span>
+                                            <span className="recently-item-content">
+                                                <span className="recently-item-topline">
+                                                    <span className="recently-status-pill">{item.status || "Available"}</span>
+                                                    <span className="recently-item-cta">
+                                                        View Details
+                                                        <i className="fas fa-arrow-right"></i>
+                                                    </span>
+                                                </span>
+                                                <span className="recently-item-title">{item.name}</span>
+                                                <span className="recently-item-meta">
+                                                    <i className="fas fa-map-marker-alt"></i>
+                                                    {item.locality || item.location || "Location not listed"}
+                                                </span>
+                                                <span className="recently-item-footer">
+                                                    <span>{item.priceLabel || "Price on request"}</span>
+                                                    <small>{item.type || "Property"}</small>
+                                                </span>
+                                            </span>
+                                        </Link>
                                     ))}
                                 </div>
                             </div>

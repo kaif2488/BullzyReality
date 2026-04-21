@@ -41,20 +41,26 @@
 }
 
 .header-brand {
+    min-width: max-content;
+    flex: 0 0 auto;
     margin-right: 0;
 }
 
 .brand-wrap {
     gap: 0;
+    max-width: none;
+    min-width: max-content;
     cursor: pointer;
     user-select: none;
 }
 
 .logo-shell {
+    position: relative;
     width: 48px;
     height: 48px;
     padding: 0;
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     border-radius: 12px;
@@ -62,6 +68,18 @@
     background: linear-gradient(145deg, #f8fafd 0%, #eef2f9 100%);
     border: 1px solid rgba(31, 42, 68, 0.15);
     box-shadow: 0 10px 22px rgba(12, 28, 50, 0.2);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.logo-shell::after {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    background: linear-gradient(120deg, transparent 34%, rgba(255, 255, 255, 0.55) 48%, transparent 62%);
+    opacity: 0;
+    transform: translateX(-80%) rotate(12deg);
+    transition: opacity 0.35s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
 }
 
 .header .logo-img {
@@ -78,22 +96,34 @@
     display: inline-flex;
     align-items: center;
     overflow: hidden;
-    max-width: 240px;
+    max-width: max-content;
     opacity: 1;
-    transition: max-width 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    transition: max-width 0.72s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.44s ease;
 }
 
 .header .brand-text {
     display: inline-block;
     margin-left: 10px;
     white-space: nowrap;
-    font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+    font-size: clamp(0.84rem, 2.8vw, 1.05rem);
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.045em;
     color: #1f2a44;
     transform: translateX(0) scale(1);
     opacity: 1;
-    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    transform-origin: left center;
+    transition: transform 0.72s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.44s ease, letter-spacing 0.35s ease;
+}
+
+.brand-wrap.brand-collapsed .logo-shell {
+    border-color: rgba(31, 42, 68, 0.24);
+    box-shadow: 0 13px 30px rgba(12, 28, 50, 0.26);
+    transform: translateZ(0) scale(1.04);
+}
+
+.brand-wrap.brand-collapsed .logo-shell::after {
+    opacity: 1;
+    transform: translateX(80%) rotate(12deg);
 }
 
 .brand-wrap.brand-collapsed .brand-text-shell {
@@ -102,11 +132,13 @@
 }
 
 .brand-wrap.brand-collapsed .brand-text {
-    transform: translateX(-44px) scale(0.9);
+    letter-spacing: -0.04em;
     opacity: 0;
+    transform: translateX(-42px) scale(0.82);
 }
 
 .header-toggler {
+    flex: 0 0 auto;
     border: 1px solid rgba(31, 42, 68, 0.22);
     border-radius: 10px;
     width: 42px;
@@ -170,7 +202,58 @@
     -webkit-backdrop-filter: blur(10px);
 }
 
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .header .brand-text {
+        font-size: 0.94rem;
+        letter-spacing: 0.025em;
+    }
+
+    .header-nav-links {
+        gap: 0;
+    }
+
+    .header-nav-link {
+        padding: 9px 11px !important;
+        font-size: 0.86rem;
+    }
+}
+
 @media (max-width: 991.98px) {
+    .header .navbar > .container-fluid {
+        flex-wrap: wrap;
+    }
+
+    .header-brand {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .brand-wrap {
+        max-width: calc(100vw - 132px);
+        min-width: 0;
+    }
+
+    .brand-wrap.brand-collapsed .logo-shell {
+        box-shadow: 0 10px 22px rgba(12, 28, 50, 0.2);
+        transform: none;
+    }
+
+    .brand-wrap.brand-collapsed .logo-shell::after {
+        opacity: 0;
+        transform: translateX(-80%) rotate(12deg);
+    }
+
+    .brand-wrap.brand-collapsed .brand-text-shell {
+        max-width: max-content;
+        opacity: 1;
+    }
+
+    .brand-wrap.brand-collapsed .brand-text {
+        letter-spacing: 0.045em;
+        opacity: 1;
+        transform: none;
+    }
+
     .header.header-overlay {
         background: rgba(248, 250, 253, 0.14);
         border-bottom: 1px solid rgba(255, 255, 255, 0.16);
@@ -204,6 +287,8 @@
         padding-top: 0;
         padding-bottom: 0;
         pointer-events: none;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
         will-change: max-height, opacity, transform;
         transition:
             max-height 0.52s cubic-bezier(0.22, 1, 0.36, 1),
@@ -216,8 +301,10 @@
     }
 
     .header-collapse.show {
-        max-height: 360px;
+        max-height: min(72vh, 430px);
         opacity: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
         transform: translateY(0) scale(1);
         margin-top: 12px;
         padding-top: 10px;
@@ -261,17 +348,86 @@
     }
 
     .brand-text-shell {
-        max-width: 180px;
+        max-width: max-content;
     }
 
     .header .brand-text {
-        font-size: 0.9rem;
-        letter-spacing: 0.05em;
+        font-size: 0.84rem;
+        letter-spacing: 0.025em;
+    }
+
+    .brand-wrap.brand-collapsed .brand-text {
+        letter-spacing: 0.025em;
     }
 
     .header-toggler {
         width: 40px;
         height: 40px;
         padding: 8px 7px;
+    }
+}
+
+@media (max-width: 399.98px) {
+    .header .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .logo-shell {
+        width: 38px;
+        height: 38px;
+        border-radius: 9px;
+    }
+
+    .brand-text-shell {
+        max-width: max-content;
+        opacity: 1;
+    }
+
+    .header .brand-text {
+        margin-left: 7px;
+        font-size: 0.74rem;
+        letter-spacing: 0.015em;
+        transform: none;
+        opacity: 1;
+    }
+
+    .brand-wrap.brand-collapsed .brand-text {
+        letter-spacing: 0.015em;
+    }
+
+    .header-toggler {
+        width: 38px;
+        height: 38px;
+        padding: 8px 7px;
+        border-radius: 9px;
+    }
+
+    .header-collapse.show {
+        max-height: min(74vh, 390px);
+        margin-top: 10px;
+        padding: 8px;
+        border-radius: 18px;
+    }
+
+    .header-nav-link {
+        min-height: 44px;
+        padding: 11px 12px !important;
+        font-size: 0.86rem;
+    }
+}
+
+@media (max-height: 520px) and (max-width: 991.98px) {
+    .header-collapse.show {
+        max-height: calc(100vh - 86px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .brand-text-shell,
+    .header .brand-text,
+    .logo-shell,
+    .logo-shell::after {
+        transition: none;
     }
 }
